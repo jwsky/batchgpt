@@ -139,8 +139,8 @@
                 var apiKey = $("#apikey").val();
                 var selectedModel = $("#model").val();
                 $.ajax({
-                    url: "api_p.php",
-                    //url: "https://api.openai.com/v1/chat/completions",
+                    //url: "api_p.php",
+                    url: "https://api.openai.com/v1/chat/completions",
                     method: "POST",
                     beforeSend: function(xhr) {
                         xhr.setRequestHeader("Content-Type", "application/json");
