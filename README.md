@@ -23,7 +23,7 @@ $.ajax({
 - 如果您可以使用OpenAI API，您可以在本地计算机上运行index.html。
 - 如果您不能使用OpenAI API，您需要找到自己的API或使用api_p.php。您应将api_p.php放置在您的服务器上。
 请记住在index.html中按照您的设置修改API端点。
-##另外需要提醒：
+## 另外需要提醒：
 您需要拥有一个open AI的apikey来使用这个功能
 
 示例：
