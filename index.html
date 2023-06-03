@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>BatchGPT</title>
     <!-- Bootstrap CSS -->
-    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
     <!-- jQuery library -->
-    <script src="jquery.min.js"></script>
+    <script src="js/jquery.min.js"></script>
 
     <style>
         .scrollable-raw {
@@ -45,6 +45,9 @@
             var savedSystemMessage = localStorage.getItem('systemMessage');
             var savedContentPrefix = localStorage.getItem('contentPrefix');
             var savedApikey = localStorage.getItem('apikey');
+            var savedtemperature = localStorage.getItem('temperature');
+
+
 
             if (savedInputContent) {
                 $('#input_content').val(savedInputContent);
@@ -61,6 +64,9 @@
             if (savedApikey) {
                 $('#apikey').val(savedApikey);
             }
+            if (savedtemperature) {
+                $('#temperature').val(savedtemperature);
+            }
 
 
 
@@ -70,11 +76,13 @@
                 var systemMessage = $('#system_message').val();
                 var contentPrefix = $('#content_prefix').val();
                 var apikey = $('#apikey').val();
+                var temperature = $('#temperature').val();
 
                 localStorage.setItem('inputContent', inputValue);
                 localStorage.setItem('systemMessage', systemMessage);
                 localStorage.setItem('contentPrefix', contentPrefix);
                 localStorage.setItem('apikey', apikey);
+                localStorage.setItem('temperature', temperature);
 
                 //var lines = $('#input_content').val().split('\n');
                 var lines = $('#input_content').val().split('\n');
@@ -138,6 +146,7 @@
                 console.log(system_message);
                 var apiKey = $("#apikey").val();
                 var selectedModel = $("#model").val();
+                var selectedTemperature = $('#temperature').find(":selected").text();
                 $.ajax({
                     //url: "api_p.php",
                     url: "https://api.openai.com/v1/chat/completions",
@@ -149,6 +158,7 @@
                     },
                     data: JSON.stringify({
                         "model": selectedModel,
+                        "temperature": parseFloat(selectedTemperature), // Make sure the selected temperature is a valid number
                         "messages": [
                             {"role": "system", "content": system_message},
                             {"role": "user", "content": content}
@@ -161,7 +171,7 @@
                         totalTokens += tokensUsed; // Aggregate tokens
                         tokenCost += calculateCost(selectedModel, response); // Aggregate cost
                         var exchangeRate = 7; // Exchange rate of USD to CNY
-                        $('#cost_info').text('Token used=' + totalTokens / 1000 + '千, Cost = $' + tokenCost.toFixed(2) + ' USD, 大约 = ¥' + (tokenCost*exchangeRate).toFixed(2) + '元'); // Display the cost info
+                        $('#cost_info').text('Token used=' + totalTokens / 1000 + 'K, Cost = $' + tokenCost.toFixed(2) + ' USD, 大约 = ¥' + (tokenCost*exchangeRate).toFixed(2) + '元'); // Display the cost info
                         $('#result' + no).text(result);
                         $('#tokens' + no).text(tokensUsed);
 
@@ -193,14 +203,40 @@
 
 <div class="container my-4">
     <div class="row">
-        <div class="col-md-6">
-            <input type="text" id="apikey" class="form-control" placeholder="Enter API Key" required>
+        <div class="col-md-4">
+            <input type="password" id="apikey" class="form-control" placeholder="Enter API Key" required>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <select class="form-select" id="model" required="" onchange="changeColor(this)">
                 <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
                 <option value="gpt-4">gpt-4</option>
             </select>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" id="temperature" required="" ">
+                <option value="0">0</option>
+                <option value="0.1">0.1</option>
+                <option value="0.2">0.2</option>
+                <option value="0.3">0.3</option>
+                <option value="0.4">0.4</option>
+                <option value="0.5">0.5</option>
+                <option value="0.6">0.6</option>
+                <option value="0.7">0.7</option>
+                <option selected value="0.8">0.8</option>
+                <option value="0.9">0.9</option>
+                <option value="1">1</option>
+                <option value="1.1">1.1</option>
+                <option value="1.2">1.2</option>
+                <option value="1.3">1.3</option>
+                <option value="1.4">1.4</option>
+                <option value="1.5">1.5</option>
+                <option value="1.6">1.6</option>
+                <option value="1.7">1.7</option>
+                <option value="1.8">1.8</option>
+                <option value="1.9">1.9</option>
+                <option value="2">2</option>
+            </select>
+
         </div>
     </div>
     <div class="row mt-2">
@@ -209,15 +245,16 @@
             <textarea class="form-control" id="system_message" rows="3"></textarea>
         </div>
         <div class="col-md-6">
-    <label class="form-label">
-        Content Prefix: The system will automatically add this prompt to each line of the content before making the call. It is preferable to add a colon (<span style="color: red;">:</span>) at the end.
-    </label>
-    <textarea class="form-control" id="content_prefix" rows="3"></textarea>
-</div>
-</div>
-<div class="mt-2">Content: {number}{content}, for example, {1}{standard room with pool}. The system will break down each content and fill in the resulting values into the following table based on the number.
-<textarea class="form-control " id="input_content" rows="10" required></textarea>
-</div>
+            <label class="form-label">
+                内容前缀：系统会自动把这段prompt加到内容的每一行，再进行调用，<span style="color: red;">最好加个冒号</span>:
+            </label>
+            <textarea class="form-control" id="content_prefix" rows="3"></textarea>
+        </div>
+    </div>
+
+    <div class="mt-2">内容：{编号}{内容}，例如{1}{standard room with pool}，系统会拆解每一个内容，并按照编号把返回结果填入如下表格
+    <textarea class="form-control " id="input_content" rows="10" required></textarea>
+    </div>
     <button class="btn btn-primary mt-2" id="submit">Submit</button>
     <div id="cost_info" class="mt-2"></div>
 
@@ -236,7 +273,6 @@
         </tbody>
     </table>
 </div>
-
 
 </body>
 </html>
