@@ -4,8 +4,8 @@
 This project, BatchGPT, allows you to send batch requests to GPT and receive results in a simple copy and paste operation.
 - If you have access to the OpenAI API, you can run `index.html` on your local machine. 
 - If you don't have access to the OpenAI API, you need to find your own API or use `api_p.php`. You should place `api_p.php` on your server.
-##Please remember
-an openAI apikey is also needed to use this code
+## Please remember
+An openAI apikey is also needed to use this code
 Please remember to modify the API endpoint in `index.html` as per your setup.
 Example:
 ```javascript
