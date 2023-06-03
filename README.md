@@ -1,16 +1,13 @@
 # BatchGPT(中文&English)
 
 ## English
-
 This project, BatchGPT, allows you to send batch requests to GPT and receive results in a simple copy and paste operation.
-
 - If you have access to the OpenAI API, you can run `index.html` on your local machine. 
 - If you don't have access to the OpenAI API, you need to find your own API or use `api_p.php`. You should place `api_p.php` on your server.
 
 Please remember to modify the API endpoint in `index.html` as per your setup.
 ## And Please remember
 an openAI apikey is also needed to use this code
-
 Example:
 ```javascript
 $.ajax({
@@ -20,8 +17,6 @@ $.ajax({
     method: "POST",
 });
 ```
-
-
 ## 简体中文 (Chinese Simplified)
 这个项目，BatchGPT，允许您向GPT发送批量请求并通过简单的复制和粘贴操作接收结果。
 
@@ -30,7 +25,6 @@ $.ajax({
 请记住在index.html中按照您的设置修改API端点。
 ##另外需要提醒：
 您需要拥有一个open AI的apikey来使用这个功能
-
 
 示例：
 ```javascript
