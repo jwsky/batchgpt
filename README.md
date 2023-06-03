@@ -18,6 +18,7 @@ $.ajax({
     url: "https://api.openai.com/v1/chat/completions",
     method: "POST",
 });
+```javascript
 
 
 ## 简体中文 (Chinese Simplified)
