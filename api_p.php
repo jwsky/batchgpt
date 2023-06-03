@@ -8,6 +8,7 @@ $apiKey = str_replace('Bearer ', '', $apiKey);
 // Prepare data for OpenAI API
 $data = array(
     "model" => $input["model"],
+    "temperature" => $input["temperature"],
     "messages" => $input["messages"],
 );
 
@@ -37,4 +38,5 @@ curl_close($ch);
 // Send response
 header('Content-Type: application/json');
 echo $result;
+
 ?>
