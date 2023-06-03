@@ -35,9 +35,10 @@ $.ajax({
     url: "https://api.openai.com/v1/chat/completions",
     method: "POST",
 });
+```
 
 
-How to contribute
+## How to contribute
 Please follow the contribution guidelines provided in CONTRIBUTING.md. We welcome and appreciate any and all contributions.
 
 
