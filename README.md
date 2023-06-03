@@ -10,7 +10,6 @@ This project, BatchGPT, allows you to send batch requests to GPT and receive res
 Please remember to modify the API endpoint in `index.html` as per your setup.
 
 Example:
-
 ```javascript
 $.ajax({
     // Choose the URL as per your setup
@@ -18,7 +17,7 @@ $.ajax({
     url: "https://api.openai.com/v1/chat/completions",
     method: "POST",
 });
-```javascript
+```
 
 
 ## 简体中文 (Chinese Simplified)
