@@ -1,4 +1,4 @@
-# BatchGPT
+# BatchGPT(中文&English)
 
 ## English
 
