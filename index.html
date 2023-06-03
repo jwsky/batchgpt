@@ -209,16 +209,15 @@
             <textarea class="form-control" id="system_message" rows="3"></textarea>
         </div>
         <div class="col-md-6">
-            <label class="form-label">
-                内容前缀：系统会自动把这段prompt加到内容的每一行，再进行调用，<span style="color: red;">最好加个冒号</span>:
-            </label>
-            <textarea class="form-control" id="content_prefix" rows="3"></textarea>
-        </div>
-    </div>
-
-    <div class="mt-2">内容：{编号}{内容}，例如{1}{standard room with pool}，系统会拆解每一个内容，并按照编号把返回结果填入如下表格
-    <textarea class="form-control " id="input_content" rows="10" required></textarea>
-    </div>
+    <label class="form-label">
+        Content Prefix: The system will automatically add this prompt to each line of the content before making the call. It is preferable to add a colon (<span style="color: red;">:</span>) at the end.
+    </label>
+    <textarea class="form-control" id="content_prefix" rows="3"></textarea>
+</div>
+</div>
+<div class="mt-2">Content: {number}{content}, for example, {1}{standard room with pool}. The system will break down each content and fill in the resulting values into the following table based on the number.
+<textarea class="form-control " id="input_content" rows="10" required></textarea>
+</div>
     <button class="btn btn-primary mt-2" id="submit">Submit</button>
     <div id="cost_info" class="mt-2"></div>
 
