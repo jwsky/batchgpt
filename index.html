@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BatchGPT</title>
+    <!-- Bootstrap CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery library -->
+    <script src="js/jquery.min.js"></script>
+
+    <style>
+        .scrollable-raw {
+            width: 200px;
+            max-width: 400px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    </style>
+
+
+
+    <script>
+        function changeColor(selectObj) {
+            // get the index of the selected option
+            var idx = selectObj.selectedIndex;
+            // get the value of the selected option
+            var val = selectObj.options[idx].value;
+            // use the value to change the color
+            if (val == "gpt-4") {
+                selectObj.style.color = "red";
+            } else {
+                selectObj.style.color = "black";
+            }
+        }
+    </script>
+    <script>
+        $(document).ready(function(){
+            var totalTokens = 0; // Variable to store total tokens used
+            var tokenCost = 0; // Variable to store total cost
+            var maxConcurrentRequests = 5;
+            var activeRequests = 0;
+            var pendingLines = [];
+            var savedInputContent = localStorage.getItem('inputContent');
+            var savedSystemMessage = localStorage.getItem('systemMessage');
+            var savedContentPrefix = localStorage.getItem('contentPrefix');
+            var savedApikey = localStorage.getItem('apikey');
+
+            if (savedInputContent) {
+                $('#input_content').val(savedInputContent);
+            }
+
+            if (savedSystemMessage) {
+                $('#system_message').val(savedSystemMessage);
+            }
+
+            if (savedContentPrefix) {
+                $('#content_prefix').val(savedContentPrefix);
+            }
+
+            if (savedApikey) {
+                $('#apikey').val(savedApikey);
+            }
+
+
+
+            $('#submit').on('click', function(){
+                $('#tableBody').empty();
+                var inputValue = $('#input_content').val();
+                var systemMessage = $('#system_message').val();
+                var contentPrefix = $('#content_prefix').val();
+                var apikey = $('#apikey').val();
+
+                localStorage.setItem('inputContent', inputValue);
+                localStorage.setItem('systemMessage', systemMessage);
+                localStorage.setItem('contentPrefix', contentPrefix);
+                localStorage.setItem('apikey', apikey);
+
+                //var lines = $('#input_content').val().split('\n');
+                var lines = $('#input_content').val().split('\n');
+                lines = lines.filter(function(line) {
+                    return line.trim() !== '';
+                });
+                var content_prefix = $('#content_prefix').val();
+
+                for (let i = 0; i < lines.length; i++) {
+                    var lineParts = lines[i].split('}{');
+                    var no = lineParts[0].replace('{', '');
+                    var content_clean = lineParts[1].replace('}', '');
+                    var content = content_prefix + lineParts[1].replace('}', '');
+
+                    var row = '<tr><td>' + no + '</td><td class="scrollable-raw">' + content + '</td><td id="content_clean' + no + '">' + content_clean + '</td><td id="result' + no + '">Pending</td><td id="tokens' + no + '">Pending</td></tr>';
+                    $('table').append(row);
+
+                    pendingLines.push({no: no, content: content});
+                }
+
+                processNextLines();
+            });
+
+            function processNextLines() {
+                while (activeRequests < maxConcurrentRequests && pendingLines.length > 0) {
+                    let line = pendingLines.shift();
+                    processLine(line.no, line.content);
+                }
+            }
+
+            function calculateCost(model, response) {
+                let pricePrompt, priceCompletion;
+                let promptTokens = response.usage.prompt_tokens;
+                let completionTokens = response.usage.completion_tokens;
+
+                switch (model) {
+                    case 'gpt-3.5-turbo':
+                        pricePrompt = priceCompletion = 0.002;
+                        break;
+                    case 'gpt-4':
+                        pricePrompt = 0.06;
+                        priceCompletion = 0.12;
+                        break;
+                    default:
+                        pricePrompt = priceCompletion = 0.12;
+                        break;
+                }
+                console.log(promptTokens);
+                console.log(pricePrompt);
+                console.log(completionTokens);
+                console.log(priceCompletion);
+
+                return ((promptTokens * pricePrompt) + (completionTokens * priceCompletion)) / 1000;
+            }
+
+
+
+            function processLine(no, content) {
+                activeRequests++;
+                var system_message = $('#system_message').val();
+                console.log(system_message);
+                var apiKey = $("#apikey").val();
+                var selectedModel = $("#model").val();
+                $.ajax({
+                    url: "api_p.php",
+                    //url: "https://api.openai.com/v1/chat/completions",
+                    method: "POST",
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader("Content-Type", "application/json");
+                        //xhr.setRequestHeader("Authorization", "Bearer ");
+                        xhr.setRequestHeader("Authorization", "Bearer " + apiKey);
+                    },
+                    data: JSON.stringify({
+                        "model": selectedModel,
+                        "messages": [
+                            {"role": "system", "content": system_message},
+                            {"role": "user", "content": content}
+                        ]
+                    }),
+                    success: function(response) {
+                        // Get response from OpenAI API
+                        let result = response.choices[0].message.content;
+                        let tokensUsed = response.usage.total_tokens;
+                        totalTokens += tokensUsed; // Aggregate tokens
+                        tokenCost += calculateCost(selectedModel, response); // Aggregate cost
+                        var exchangeRate = 7; // Exchange rate of USD to CNY
+                        $('#cost_info').text('Token used=' + totalTokens / 1000 + '千, Cost = $' + tokenCost.toFixed(2) + ' USD, 大约 = ¥' + (tokenCost*exchangeRate).toFixed(2) + '元'); // Display the cost info
+                        $('#result' + no).text(result);
+                        $('#tokens' + no).text(tokensUsed);
+
+                        activeRequests--;
+                        processNextLines();
+                    },
+                    error: function(error) {
+                        $('#result' + no).text("Failed");
+                        $('#tokens' + no).text("N/A");
+
+                        activeRequests--;
+                        processNextLines();
+                    }
+                });
+            }
+
+
+        });
+
+
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">BatchGPT v1.0</a>
+    </div>
+</nav>
+
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-6">
+            <input type="text" id="apikey" class="form-control" placeholder="Enter API Key" required>
+        </div>
+        <div class="col-md-6">
+            <select class="form-select" id="model" required="" onchange="changeColor(this)">
+                <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+                <option value="gpt-4">gpt-4</option>
+            </select>
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-6">
+            <label class="form-label">System Message</label>
+            <textarea class="form-control" id="system_message" rows="3"></textarea>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">
+                内容前缀：系统会自动把这段prompt加到内容的每一行，再进行调用，<span style="color: red;">最好加个冒号</span>:
+            </label>
+            <textarea class="form-control" id="content_prefix" rows="3"></textarea>
+        </div>
+    </div>
+
+    <div class="mt-2">内容：{编号}{内容}，例如{1}{standard room with pool}，系统会拆解每一个内容，并按照编号把返回结果填入如下表格
+    <textarea class="form-control " id="input_content" rows="10" required></textarea>
+    </div>
+    <button class="btn btn-primary mt-2" id="submit">Submit</button>
+    <div id="cost_info" class="mt-2"></div>
+
+    <table class="table mt-5" id="resultTable">
+        <thead>
+        <tr>
+            <th scope="col">Sequence</th>
+            <th scope="col" class="scrollable-raw">Content Raw</th>
+            <th scope="col">Content Clean</th>
+            <th scope="col">Result</th>
+            <th scope="col">Token Used</th>
+
+        </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="js/bootstrap.min.js"></script>
+</body>
+</html>
