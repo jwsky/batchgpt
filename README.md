@@ -1,4 +1,5 @@
 # BatchGPT(中文&English)
+![image](https://github.com/jwsky/batchgpt/assets/2600392/dc1beea6-0b50-43af-bc15-12f49cdf7a36)
 
 ## English
 This project, BatchGPT, allows you to send batch requests to GPT and receive results in a simple copy and paste operation.
